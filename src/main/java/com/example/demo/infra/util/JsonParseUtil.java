@@ -1,0 +1,69 @@
+package com.example.demo.infra.util;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import tools.jackson.databind.ObjectMapper;
+
+/**
+ * Json Parse 工具類
+ */
+@Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class JsonParseUtil {
+
+	@Autowired
+	protected static final ObjectMapper mapper = new ObjectMapper();
+
+	/**
+	 * 序列化物件 為 JSON
+	 * 
+	 * @param target 目標物件
+	 * @return String 序列化後的 json 字串
+	 */
+	public static String serialize(Object target) {
+		try {
+			return mapper.writeValueAsString(target);
+		} catch (Exception e) {
+			log.error("Occurred Json Processing Exception", e);
+			return "";
+		}
+	}
+
+	/**
+	 * 反序列化 JSON 回 物件
+	 * 
+	 * @param target json 字串
+	 * @param clazz  目標物件類型
+	 * @return 物件
+	 */
+	public static <T> T unserialize(String target, Class<T> clazz) {
+		try {
+			return mapper.readValue(target, clazz);
+		} catch (Exception e) {
+			log.error("Occurred Exception ", e);
+			return null;
+		}
+
+	}
+
+	/**
+	 * 反序列化 JSON 回 物件列表
+	 * 
+	 * @param target json 字串
+	 * @param clazz  目標物件類型
+	 * @return 物件列表
+	 */
+	public static <T> List<T> unserializeArrayOfObject(String target, Class<T> clazz) {
+		try {
+			return mapper.readValue(target, mapper.getTypeFactory().constructCollectionType(List.class, clazz));
+		} catch (Exception e) {
+			log.error("Occurred Exception", e);
+			return null;
+		}
+	}
+}
