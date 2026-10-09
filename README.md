@@ -2,14 +2,6 @@
 
 ## External HTTP Client Architecture
 
-### 相關技術選用 (Tech Stack)
-
-* **語言與底層框架**：Java 21 / Spring Boot 4.0.2
-* **核心 HTTP 發送引擎**：`RestClient` (Spring 6 推出之流暢式 HTTP 客戶端，正式取代舊有的 `RestTemplate`)
-* **宣告式介面綁定**：`Spring HTTP Interfaces` (利用 `@GetExchange`、`@PostExchange` 宣告 API 介面，搭配動態代理 `HttpServiceProxyFactory` 產生實體，達成零實作呼叫)
-* **API 規格與文件化**：`OpenAPI (Swagger)` (用於標準化並視覺化展示本專案對外提供的 API 介面)
-
----
 
 ### 設計目標
 
@@ -25,6 +17,16 @@
 * **零修改核心擴充**：未來擴充新系統，核心基礎建設 (`httpclient/`) 完全不需要修改。
 
 ---
+
+### 相關技術選用 (Tech Stack)
+
+* **語言與底層框架**：Java 21 / Spring Boot 4.0.2
+* **核心 HTTP 發送引擎**：`RestClient` (Spring 6 推出之流暢式 HTTP 客戶端，正式取代舊有的 `RestTemplate`)
+* **宣告式介面綁定**：`Spring HTTP Interfaces` (利用 `@GetExchange`、`@PostExchange` 宣告 API 介面，搭配動態代理 `HttpServiceProxyFactory` 產生實體，達成零實作呼叫)
+* **API 規格與文件化**：`OpenAPI (Swagger)` (用於標準化並視覺化展示本專案對外提供的 API 介面)
+
+---
+
 
 ### 架構總覽
 
