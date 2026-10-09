@@ -1,5 +1,6 @@
-package com.example.demo.infra.external.authsystem;
+package com.example.demo.infra.adapter;
 
+import com.example.demo.infra.external.authsystem.AuthHttpClient;
 import org.springframework.stereotype.Component;
 
 import com.example.demo.application.port.out.AuthServiceClientPort;
@@ -20,7 +21,7 @@ import lombok.RequiredArgsConstructor;
  */
 @Component
 @RequiredArgsConstructor
-public class AuthClientAdapter implements AuthServiceClientPort {
+public class AuthServiceClientAdapter implements AuthServiceClientPort {
 
 	private final AuthHttpClient authHttpClient;
 
