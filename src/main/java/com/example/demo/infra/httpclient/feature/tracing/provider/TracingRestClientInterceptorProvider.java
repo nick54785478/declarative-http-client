@@ -1,33 +1,35 @@
-package com.example.demo.infra.httpclient.feature.logging.provider;
+package com.example.demo.infra.httpclient.feature.tracing.provider;
 
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 
-import com.example.demo.infra.httpclient.feature.logging.interceptor.LoggingInterceptor;
+import com.example.demo.infra.httpclient.feature.tracing.interceptor.TracingInterceptor;
 import com.example.demo.infra.httpclient.core.RestClientInterceptorProvider;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * LoggingInterceptor Provider。
+ * TracingInterceptor Provider。
  *
  * <p>
- * 負責為系統設定 {@link LoggingInterceptor}，以列印統一的 HTTP 請求與回應日誌資訊。
+ * 將 {@link TracingInterceptor} 掛載到 {@link RestClient.Builder}，確保外部系統請求皆有統一
+ * TraceId 寫入及 MDC 記錄。
  * </p>
  *
  * <p>
  * 職責：
  * <ul>
- * <li>對所有系統皆回傳 supports 為 true</li>
- * <li>將 LoggingInterceptor 掛載到 {@link RestClient.Builder}</li>
+ * <li>為每個 HTTP 請求確保有統一 TraceId</li>
+ * <li>將 TraceId 放入 MDC 供日誌追蹤</li>
+ * <li>建議在所有攔截器之前執行，確保後續攔截器皆能取得同一個 traceId</li>
  * </ul>
  * </p>
  */
 @Slf4j
 @Component
-@Order(20)
-public class LoggingInterceptorProvider implements RestClientInterceptorProvider {
+@Order(5)
+public class TracingRestClientInterceptorProvider implements RestClientInterceptorProvider {
 
 	/**
 	 * 判斷是否支援該系統。
@@ -45,13 +47,13 @@ public class LoggingInterceptorProvider implements RestClientInterceptorProvider
 	}
 
 	/**
-	 * 將 LoggingInterceptor 掛載到 RestClient Builder。
+	 * 將 TracingInterceptor 掛載到 RestClient Builder。
 	 *
 	 * @param builder    RestClient 建構器
 	 * @param systemName 系統名稱
 	 */
 	@Override
 	public void apply(RestClient.Builder builder, String systemName) {
-		builder.requestInterceptor(new LoggingInterceptor(systemName));
+		builder.requestInterceptor(new TracingInterceptor(systemName));
 	}
 }

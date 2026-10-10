@@ -24,7 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Order(30)
 @RequiredArgsConstructor
-public class ErrorInterceptorProvider implements RestClientInterceptorProvider {
+public class ErrorRestClientInterceptorProvider implements RestClientInterceptorProvider {
 
 	private final ExternalApiErrorHandlerRegistry registry;
 

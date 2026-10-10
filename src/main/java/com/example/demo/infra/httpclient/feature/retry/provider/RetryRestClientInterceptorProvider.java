@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @Order(25)
-public class RetryInterceptorProvider implements RestClientInterceptorProvider {
+public class RetryRestClientInterceptorProvider implements RestClientInterceptorProvider {
 
 	/**
 	 * 最大重試次數，預設 3次。

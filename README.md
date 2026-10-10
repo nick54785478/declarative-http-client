@@ -21,25 +21,33 @@
 ### 相關技術選用 (Tech Stack)
 
 * **語言與底層框架**：Java 21 / Spring Boot 4.0.2
-* **核心 HTTP 發送引擎**：`RestClient` (Spring 6 推出之流暢式 HTTP 客戶端，正式取代舊有的 `RestTemplate`)
+* **核心 HTTP 發送引擎 (雙引擎支援)**：
+  * **同步 (Blocking)**：`RestClient` (Spring 6 推出之流暢式 HTTP 客戶端，正式取代舊有的 `RestTemplate`)
+  * **非同步/響應式 (Reactive)**：`WebClient` (基於 Project Reactor，適合高併發、非阻塞場景)
 * **宣告式介面綁定**：`Spring HTTP Interfaces` (利用 `@GetExchange`、`@PostExchange` 宣告 API 介面，搭配動態代理 `HttpServiceProxyFactory` 產生實體，達成零實作呼叫)
 * **API 規格與文件化**：`OpenAPI (Swagger)` (用於標準化並視覺化展示本專案對外提供的 API 介面)
 
 ---
 
 
-### 架構總覽
+### 架構總覽 (Dual-Engine Architecture)
 
 ```text
 ExternalSystemProperties (設定檔注入)
         ↓
-RestClientFactory                   --> 核心工廠，針對各個 systemName 初始化 RestClient.Builder
-        ↓
-RestClientInterceptorProvider (多個)  --> 透過 Spring DI，將各種 Feature (auth, error, header 等) 的攔截器掛載至 Builder
-        ↓
-HttpServiceProxyFactory             --> Spring 6 HTTP Interfaces 動態代理工廠
-        ↓
-XXXHttpClient Interface             --> 強型別的宣告式客戶端 (Declarative Client)
+[ 同步引擎 ]                        [ 響應式引擎 ]
+RestClientFactory                  WebClientFactory
+        ↓                                ↓
+RestClientInterceptorProvider      WebClientFilterProvider
+(多個 ClientHttpRequestInterceptor)  (多個 ExchangeFilterFunction)
+        ↘                                ↙
+        [ 共用相同的 Core Strategy / Resolver ]
+                         ↓
+             HttpServiceProxyFactory
+       (依據 external.client-type 決定注入哪種 Adapter)
+                         ↓
+              XXXHttpClient Interface
+       (強型別的宣告式客戶端 Declarative Client)
 ```
 
 ---
@@ -85,9 +93,12 @@ XXXHttpClient Interface             --> 強型別的宣告式客戶端 (Declarat
 * **業務異常 (`BusinessErrorInterceptor`)**：處理狀態碼 2xx 但 JSON body 內含失敗碼的情況。
 * 兩者皆透過 Registry 動態尋找對應系統的錯誤策略 (Strategy / Handler) 來轉換為 `ExternalApiException`。
 
-**4. ExternalSystemProperties**
+**4. ExternalSystemProperties 與配置開關**
 * **配置** (於 `application.properties` 或 `application.yml`)：
   ```properties
+  # 切換底層 HTTP 引擎 (REST_CLIENT 或 WEB_CLIENT)
+  external.client-type=REST_CLIENT
+  
   external.retry.max-attempts=3
   external.retry.delay-millis=1000
   
@@ -97,8 +108,8 @@ XXXHttpClient Interface             --> 強型別的宣告式客戶端 (Declarat
   external.systems.auth.enable-business-error-handling=true
   
   # 自訂 Header (支援動態變數)
-  external.custom-headers.auth.X-Client-Id=my-client
-  external.custom-headers.auth.X-Request-Id=${uuid}
+  external.systems.auth.headers.X-Client-Id=my-client
+  external.systems.auth.headers.X-Request-Id=${uuid}
   ```
 
 **5. Declarative HttpClient (Spring 6)**

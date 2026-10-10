@@ -1,12 +1,15 @@
 package com.example.demo.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.support.RestClientAdapter;
+import org.springframework.web.reactive.function.client.support.WebClientAdapter;
 import org.springframework.web.service.invoker.HttpServiceProxyFactory;
 
 import com.example.demo.infra.external.authsystem.AuthHttpClient;
 import com.example.demo.infra.httpclient.core.RestClientFactory;
+import com.example.demo.infra.httpclient.core.WebClientFactory;
 
 /**
  * HTTP Client Configuration.
@@ -39,20 +42,33 @@ import com.example.demo.infra.httpclient.core.RestClientFactory;
 @Configuration
 public class HttpClientConfiguration {
 
+	@Value("${external.client-type:REST_CLIENT}")
+	private String clientType;
+
 	/**
 	 * AuthService HttpClient Bean。
 	 *
 	 * <p>
-	 * 透過 RestClientFactory 建立 auth 專用的 RestClient，並轉換為動態代理介面 {@link AuthHttpClient}。
+	 * 透過 RestClientFactory 或 WebClientFactory 建立 auth 專用的 Client，並轉換為動態代理介面 {@link AuthHttpClient}。
 	 * </p>
 	 *
-	 * @param factory RestClient 工廠
+	 * @param restFactory RestClient 工廠
+	 * @param webFactory  WebClient 工廠
 	 * @return {@link AuthHttpClient} Bean
 	 */
 	@Bean
-	public AuthHttpClient authHttpClient(RestClientFactory factory) {
-		return HttpServiceProxyFactory.builderFor(RestClientAdapter.create(factory.create("auth"))).build()
-				.createClient(AuthHttpClient.class);
+	public AuthHttpClient authHttpClient(RestClientFactory restFactory, WebClientFactory webFactory) {
+		HttpServiceProxyFactory proxyFactory;
+		
+		if ("WEB_CLIENT".equalsIgnoreCase(clientType)) {
+			// 使用 WebClient (非同步/響應式)
+			proxyFactory = HttpServiceProxyFactory.builderFor(WebClientAdapter.create(webFactory.create("auth"))).build();
+		} else {
+			// 使用 RestClient (同步)
+			proxyFactory = HttpServiceProxyFactory.builderFor(RestClientAdapter.create(restFactory.create("auth"))).build();
+		}
+		
+		return proxyFactory.createClient(AuthHttpClient.class);
 	}
 
 //	/**

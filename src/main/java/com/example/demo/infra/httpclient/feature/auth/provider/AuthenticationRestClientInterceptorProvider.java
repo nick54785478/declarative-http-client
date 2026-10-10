@@ -42,7 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Order(10)
 @RequiredArgsConstructor
-public class AuthenticationInterceptorProvider implements RestClientInterceptorProvider {
+public class AuthenticationRestClientInterceptorProvider implements RestClientInterceptorProvider {
 
 	/**
 	 * 外部系統設定，用於判斷系統是否有設定認證屬性。

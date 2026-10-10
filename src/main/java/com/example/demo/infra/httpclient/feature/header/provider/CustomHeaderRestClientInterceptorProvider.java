@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Order(15)
 @RequiredArgsConstructor
-public class CustomHeaderInterceptorProvider implements RestClientInterceptorProvider {
+public class CustomHeaderRestClientInterceptorProvider implements RestClientInterceptorProvider {
 
 	private final ExternalSystemProperties properties;
 	private final HeaderValueResolverFactory resolverFactory;

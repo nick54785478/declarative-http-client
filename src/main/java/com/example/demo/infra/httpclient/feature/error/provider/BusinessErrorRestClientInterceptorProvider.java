@@ -23,7 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @Order(40)
 @RequiredArgsConstructor
-public class BusinessErrorInterceptorProvider implements RestClientInterceptorProvider {
+public class BusinessErrorRestClientInterceptorProvider implements RestClientInterceptorProvider {
 
 	private final ExternalSystemProperties properties;
 	private final BusinessErrorInterceptorFactory factory;
